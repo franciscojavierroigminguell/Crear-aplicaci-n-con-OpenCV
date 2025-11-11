@@ -1,0 +1,30 @@
+let src = cv.imread('imageCanvasInput');
+
+let gray = new cv.Mat();
+let blurred = new cv.Mat();
+let edges = new cv.Mat();
+let contours = new cv.MatVector();   // ¡¡ESTO ERA EL ERROR!!
+let hierarchy = new cv.Mat();
+let result = src.clone();
+
+1. Gris + desenfoque ligero
+cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
+
+2. Canny bien ajustado
+cv.Canny(blurred, edges, 75, 200);
+
+3. Detectamos contornos
+cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+4. Dibujamos en verde neón grueso
+let color = new cv.Scalar(0, 255, 150, 255);
+for (let i = 0; i < contours.size(); ++i) {
+    cv.drawContours(result, contours, i, color, 3);
+}
+
+dst = result;
+
+5. Limpieza
+gray.delete(); blurred.delete(); edges.delete();
+hierarchy.delete(); contours.delete();
