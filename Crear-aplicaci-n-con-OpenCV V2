@@ -1,0 +1,37 @@
+function detectarContornosVerdeNeon() {
+    let src = cv.imread('imageCanvasInput');
+    let dst = src.clone(); // trabajamos sobre una copia
+
+    try {
+        let gray = cv.Mat.create();
+        cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+        
+        let blurred = cv.Mat.create();
+        cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 1.5);
+
+        let edges = cv.Mat.create();
+        cv.Canny(blurred, edges, 80, 200);
+
+        // FORMA MÁS MODERNA Y SEGURA (compatible 2024-2025)
+        let contours = new cv.MatVector();
+        let hierarchy = new cv.Mat();
+        
+        cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+        // Verde neón ultra brillante
+        let neonGreen = new cv.Scalar(0, 255, 100, 255);
+        
+        // Dibujar todos los contornos con grosor 3-4
+        cv.drawContours(dst, contours, -1, neonGreen, 4); // -1 = todos los contornos
+
+        cv.imshow('outputCanvas', dst);
+
+    } catch (error) {
+        console.error("Error en detección de contornos:", error);
+    } finally {
+        // Liberar TODA la memoria siempre
+        [src, dst, gray, blurred, edges, hierarchy, contours].forEach(mat => {
+            if (mat && !mat.isDeleted()) mat.delete();
+        });
+    }
+}
